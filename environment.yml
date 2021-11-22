@@ -1,0 +1,19 @@
+name: t0-analysis
+dependencies:
+  - python=3.6
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - seaborn
+  - tqdm
+  - ipywidgets
+  - black
+  - autopep8
+  - pylint
+  - pip:
+    - torch
+    - transformers
+    - datasets
+    - tokenizers
+    - deepspeed

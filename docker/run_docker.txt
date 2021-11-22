@@ -1,0 +1,53 @@
+docker build -f ./docker/lsv/Dockerfile --build-arg USER_UID=$UID --build-arg USER_NAME=$(id -un) -t t0-analysis:latest .
+
+############################################################################
+# LSV Server
+############################################################################
+
+
+# run docker as user mmosbach for VSCode dev
+docker run -it --rm --runtime=nvidia --pid=host --ipc=host --user mmosbach \
+    --name t0-analysis-dev \
+    -v /nethome/mmosbach/projects/t0-analysis:/t0-analysis \
+    -v /data/users/mmosbach/pre-trained-transformers:/pre-trained-transformers \
+    -v /data/users/mmosbach/datasets:/datasets \
+    -v /data/users/mmosbach/logs/t0-analysis/logfiles:/logfiles \
+    -v /data/users/mmosbach/logs/t0-analysis/checkpoints:/checkpoints \
+    -v /data/users/mmosbach/logs/t0-analysis/tb-logs:/tb-logs \
+    -v /data/users/mmosbach/logs/t0-analysis/wandb-logs:/wandb-logs \
+    -v /data/users/mmosbach/logs/transformers/checkpoints/language-modeling:/intermediate-mlms \
+    t0-analysis:latest
+
+
+# run docker as user mmosbach
+docker run -it --rm --runtime=nvidia --pid=host --ipc=host --user mmosbach \
+    -v /nethome/mmosbach/projects/t0-analysis:/t0-analysis \
+    -v /data/users/mmosbach/pre-trained-transformers:/pre-trained-transformers \
+    -v /data/users/mmosbach/datasets:/datasets \
+    -v /data/users/mmosbach/logs/t0-analysis/logfiles:/logfiles \
+    -v /data/users/mmosbach/logs/t0-analysis/checkpoints:/checkpoints \
+    -v /data/users/mmosbach/logs/t0-analysis/tb-logs:/tb-logs \
+    -v /data/users/mmosbach/logs/t0-analysis/wandb-logs:/wandb-logs \
+    -v /data/users/mmosbach/logs/transformers/checkpoints/language-modeling:/intermediate-mlms \
+    t0-analysis:latest
+
+
+# run docker as user mmosbach
+docker run -it --rm --gpus=all --pid=host --ipc=host --user mmosbach \
+    -v /nethome/mmosbach/projects/t0-analysis:/t0-analysis \
+    -v /data/users/mmosbach/pre-trained-transformers:/pre-trained-transformers \
+    -v /data/users/mmosbach/datasets:/datasets \
+    -v /data/users/mmosbach/logs/t0-analysis/logfiles:/logfiles \
+    -v /data/users/mmosbach/logs/t0-analysis/checkpoints:/checkpoints \
+    -v /data/users/mmosbach/logs/transformers/checkpoints/language-modeling:/checkpoints-transformers \
+    -v /data/users/mmosbach/logs/t0-analysis/tb-logs:/tb-logs \
+    -v /data/users/mmosbach/logs/t0-analysis/wandb-logs:/wandb-logs \
+    -v /data/users/mmosbach/logs/transformers/checkpoints/language-modeling:/intermediate-mlms \
+    t0-analysis:latest
+
+
+############################################################################
+# Put t0-analysis directory on PYTHONPATH
+############################################################################
+
+export PYTHONPATH="$PYTHONPATH:/t0-analysis"
