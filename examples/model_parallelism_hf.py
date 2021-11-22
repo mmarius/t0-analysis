@@ -6,8 +6,8 @@ import torch
 
 model_name = "bigscience/T0"
 
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name, cache_dir='/pre-trained-transformers')
+tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir='/pre-trained-transformers')
 print("Model and tokenizer loaded")
 
 model.parallelize()

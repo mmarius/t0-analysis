@@ -29,8 +29,8 @@ ds_config = {
 }
 
 _ = HfDeepSpeedConfig(ds_config)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name, cache_dir='/pre-trained-transformers')
+tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir='/pre-trained-transformers')
 print("Model and tokenizer loaded")
 
 inputs = tokenizer.encode(
