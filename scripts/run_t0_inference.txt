@@ -1,0 +1,3 @@
+# commands 
+
+bash /to-analysis/scripts/t0_inference.sh
