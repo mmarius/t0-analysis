@@ -1,4 +1,4 @@
-docker build -f ./docker/lsv/Dockerfile --build-arg USER_UID=$UID --build-arg USER_NAME=$(id -un) -t t0-analysis:latest .
+docker build -f ./docker/Dockerfile --build-arg USER_UID=$UID --build-arg USER_NAME=$(id -un) -t t0-analysis:latest .
 
 ############################################################################
 # LSV Server
