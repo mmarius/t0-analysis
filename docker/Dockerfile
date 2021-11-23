@@ -37,6 +37,7 @@ RUN python3 -m pip install tokenizers
 RUN python3 -m pip install datasets
 RUN python3 -m pip install deepspeed
 RUN python3 -m pip install wandb
+RUN python3 -m pip install tensorflow
 
 # Install additional dependencies
 RUN python3 -m pip install autopep8
