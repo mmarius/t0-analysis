@@ -1,3 +1,3 @@
 # commands 
 
-bash /to-analysis/scripts/t0_inference.sh
+bash /t0-analysis/scripts/t0_inference.sh
