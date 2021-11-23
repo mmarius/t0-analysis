@@ -18,10 +18,7 @@ ds_config = {
     },
     "zero_optimization": {
         "stage": 3,
-        "offload_param": {
-            "device": "cpu",
-            "pin_memory": True
-        },
+        "offload_param": {"device": "cpu", "pin_memory": True},
         # To tune. Current value was set to max out a 40GB A100 GPU.
         "stage3_param_persistence_threshold": 4e7,
     },
@@ -29,12 +26,18 @@ ds_config = {
 }
 
 _ = HfDeepSpeedConfig(ds_config)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name, cache_dir='/pre-trained-transformers')
-tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir='/pre-trained-transformers')
+model = AutoModelForSeq2SeqLM.from_pretrained(
+    model_name, cache_dir="/pre-trained-transformers"
+)
+tokenizer = AutoTokenizer.from_pretrained(
+    model_name, cache_dir="/pre-trained-transformers"
+)
 print("Model and tokenizer loaded")
 
 inputs = tokenizer.encode(
-    "Review: this is the best cast iron skillet you will ever buy. Is this review positive or negative?", return_tensors="pt")
+    "Review: this is the best cast iron skillet you will ever buy. Is this review positive or negative?",
+    return_tensors="pt",
+)
 inputs = inputs.to("cuda:0")
 
 deepspeed_engine, _, _, _ = deepspeed.initialize(
@@ -42,7 +45,7 @@ deepspeed_engine, _, _, _ = deepspeed.initialize(
     config_params=ds_config,
     model_parameters=None,
     optimizer=None,
-    lr_scheduler=None
+    lr_scheduler=None,
 )
 
 deepspeed_engine.module.eval()
