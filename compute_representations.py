@@ -17,6 +17,16 @@ from utils import set_seeds, POOLER
 def check_args(args):
     assert args.batch_size <= args.max_inputs
 
+    # modify output_dir
+    args.output_dir = os.path.join(
+        "/",
+        args.output_dir.split("/")[1],
+        args.task,
+        args.model_name_or_path.replace("/", "-"),
+        "decoder" if args.decoder else "encoder",
+        args.output_dir.split("/")[-1],
+    )
+
 
 def load_model(model_name_or_path, put_on_gpu=True):
     model = AutoModelForSeq2SeqLM.from_pretrained(
@@ -68,7 +78,7 @@ def save_hidden_representations(args, hidden_representations_collection):
 
     for l, hidden_representations in hidden_representations_collection.items():
         if args.layer in [-1, l]:
-            file_name = f"hidden_represenations_{args.model_name_or_path.replace('/', '-')}_layer{l}_{args.pooler_type}.hdf5"
+            file_name = f"hidden_represenations_layer{l}_{args.pooler_type}.hdf5"
             output_file = os.path.join(args.output_dir, file_name)
             create_hdf5_file(hidden_representations, output_file)
 
@@ -142,10 +152,14 @@ def main(args):
                 "attention_mask": batch["attention_mask"].to("cuda:0"),
                 # "labels": batch["label"].to("cuda:0"),
             }
-            outputs = model.generate(
-                **formatted_batch,
+            # outputs = model.generate(
+            outputs = model.forward(
+                input_ids=formatted_batch["input_ids"],
+                attention_mask=formatted_batch["attention_mask"],
+                decoder_input_ids=formatted_batch["input_ids"],
                 output_hidden_states=True,
-                return_dict_in_generate=True,
+                # return_dict_in_generate=True,
+                return_dict=True,
             )
 
             # get encoder hidden representations
@@ -160,8 +174,14 @@ def main(args):
             )  # Tuple (one element for each generated token) of tuples (one element for each layer of the decoder) of
             # :obj:`torch.FloatTensor` of shape :obj:`(batch_size, generated_length, hidden_size)`
 
+            hidden_represenations = (
+                decoder_hidden_representations
+                if args.decoder
+                else encoder_hidden_representations
+            )
+
             # post-process hidden states
-            for l, h in enumerate(encoder_hidden_representations):
+            for l, h in enumerate(hidden_represenations):
                 # post-process hidden state representation
                 h = postprocess_hidden_representation(h, pooler_type=args.pooler_type)
 
@@ -249,6 +269,12 @@ if __name__ == "__main__":
         type=str,
         default="/logfiles",
         help="where to store the hidden representations",
+    )
+
+    parser.add_argument(
+        "--decoder",
+        action="store_true",
+        help="if set, extract decoder representations",
     )
 
     parser.add_argument(
