@@ -7,3 +7,8 @@ import torch
 def prompted_rte(sample, template):
     # create a prompted RTE input
     return template.format(premise=sample["premise"], hypothesis=sample["hypothesis"])
+
+
+PROMPTED_TASKS = {
+    "rte": prompted_rte,
+}

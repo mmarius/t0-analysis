@@ -1,14 +1,21 @@
+import os
 import argparse
 import torch
+from pathlib import Path
+import h5py
+
+import numpy as np
+from tqdm import tqdm
 
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-from task_helpers import prompted_rte
+from task_helpers import PROMPTED_TASKS
+from utils import set_seeds, POOLER
 
-PROMPTED_TASK = {
-    "rte": prompted_rte,
-}
+
+def check_args(args):
+    assert args.batch_size <= args.max_inputs
 
 
 def load_model(model_name_or_path, put_on_gpu=True):
@@ -30,7 +37,7 @@ def load_tokenizer(tokenizer_name_or_path):
 
 
 def tokenize_dataset(task, dataset, tokenizer, template):
-    f = PROMPTED_TASK[task]
+    f = PROMPTED_TASKS[task]
 
     dataset = dataset.map(
         lambda s: tokenizer(
@@ -44,24 +51,53 @@ def tokenize_dataset(task, dataset, tokenizer, template):
     return dataset
 
 
-def postprocess_hidden_states(outputs):
-    # get encoder hidden representations
-    encoder_hidden_states = (
-        outputs.encoder_hidden_states
-    )  # Tuple of :obj:`torch.FloatTensor` (one for the output of the embeddings + one for the output of each layer)
-    # of shape :obj:`(batch_size, sequence_length, hidden_size)`
+def postprocess_hidden_representation(hidden_representation, pooler_type):
+    # hidden_representation.shape =  (batch_size, sequence_length, hidden_size)
+    # apply pooler
+    pooled_hidden_representation = POOLER[pooler_type](hidden_representation)
 
-    # get decoder hidden representations
-    decoder_hidden_states = (
-        outputs.decoder_hidden_states
-    )  # Tuple (one element for each generated token) of tuples (one element for each layer of the decoder) of
-    # :obj:`torch.FloatTensor` of shape :obj:`(batch_size, generated_length, hidden_size)`
+    # convert to numpy array
+    pooled_hidden_representation = pooled_hidden_representation.cpu().detach().numpy()
 
-    for l, h in enumerate(encoder_hidden_states):
-        print(l, h.shape)  # (batch_size, sequence_length, hidden_size)
+    return pooled_hidden_representation
+
+
+def save_hidden_representations(args, hidden_representations_collection):
+    # make sure output_dir exists
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
+    for l, hidden_representations in hidden_representations_collection.items():
+        if args.layer in [-1, l]:
+            file_name = f"hidden_represenations_{args.model_name_or_path.replace('/', '-')}_layer{l}_{args.pooler_type}.hdf5"
+            output_file = os.path.join(args.output_dir, file_name)
+            create_hdf5_file(hidden_representations, output_file)
+
+
+def create_hdf5_file(hidden_representations, output_file):
+    # hidden_representations.shape = (batch_size, hidden_size)
+    print(
+        f"Saving hidden representations with shape {hidden_representations.shape} to: ",
+        output_file,
+    )
+
+    with h5py.File(output_file, "w") as f:
+        for idx, h in enumerate(
+            tqdm(hidden_representations, desc="Creating hdf5 file")
+        ):
+            # Hidden represenations are indexed by their corresponding sample index. Which will be a str.
+            # Be careful when loading the data. One has to use the same str index to get the sample back.
+            f.create_dataset(
+                str(idx),  # int doesn't work here
+                h.shape,
+                dtype="float32",
+                data=h,
+            )
 
 
 def main(args):
+    # fix seeds
+    set_seeds(args.seed)
+
     # load tokenizer and model
     print(f"Loading {args.model_name_or_path} tokenizer...")
     tokenizer = load_tokenizer(args.model_name_or_path)
@@ -86,13 +122,20 @@ def main(args):
         template=args.template,
     )
     dataloader = torch.utils.data.DataLoader(
-        tokenized_dataset, batch_size=args.batch_size
+        tokenized_dataset, batch_size=args.batch_size, shuffle=False
     )
+
+    hidden_representations_collection = {}
 
     # iterate over dataset
     model.eval()
     with torch.no_grad():
         for _, batch in enumerate(dataloader):
+            # stop after max_inputs samples
+            if hidden_representations_collection:
+                if hidden_representations_collection[0].shape[0] >= args.max_inputs:
+                    break
+
             # format batch and put data on GPU
             formatted_batch = {
                 "input_ids": batch["input_ids"].to("cuda:0"),
@@ -105,15 +148,39 @@ def main(args):
                 return_dict_in_generate=True,
             )
 
+            # get encoder hidden representations
+            encoder_hidden_representations = (
+                outputs.encoder_hidden_states
+            )  # Tuple of :obj:`torch.FloatTensor` (one for the output of the embeddings + one for the output of each layer)
+            # of shape :obj:`(batch_size, sequence_length, hidden_size)`
+
+            # get decoder hidden representations
+            decoder_hidden_representations = (
+                outputs.decoder_hidden_states
+            )  # Tuple (one element for each generated token) of tuples (one element for each layer of the decoder) of
+            # :obj:`torch.FloatTensor` of shape :obj:`(batch_size, generated_length, hidden_size)`
+
             # post-process hidden states
-            postprocess_hidden_states(outputs)
+            for l, h in enumerate(encoder_hidden_representations):
+                # post-process hidden state representation
+                h = postprocess_hidden_representation(h, pooler_type=args.pooler_type)
+
+                # collect post-processed hidden states for every layer
+                if l in hidden_representations_collection:
+                    hidden_representations_collection[l] = np.concatenate(
+                        (hidden_representations_collection[l], h), axis=0
+                    )
+                else:
+                    hidden_representations_collection[l] = h
 
             # decode prediction
             # generated_sequences = tokenizer.batch_decode(
             #     outputs.sequences, skip_special_tokens=True
             # )
             # print(generated_sequences)
-            break
+
+    # store hidden states on disc
+    save_hidden_representations(args, hidden_representations_collection)
 
 
 if __name__ == "__main__":
@@ -153,9 +220,47 @@ if __name__ == "__main__":
         "--batch_size",
         type=int,
         default=2,
-        help="batch_size to use",
+        help="batch size to use",
+    )
+
+    parser.add_argument(
+        "--max_inputs",
+        type=int,
+        default=100,
+        help="collect hidden representation for `--max_input` inputs",
+    )
+
+    parser.add_argument(
+        "--layer",
+        type=int,
+        default=-1,
+        help="save hidden representation only for layer `--layer`. if -1 save hidden representations of all layers.",
+    )
+
+    parser.add_argument(
+        "--pooler_type",
+        type=str,
+        default="avg",
+        help="pooler type to use",
+    )
+
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="/logfiles",
+        help="where to store the hidden representations",
+    )
+
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="random seed",
     )
 
     args = parser.parse_args()
+
+    # check args
+    check_args(args)
 
     main(args)
