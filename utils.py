@@ -4,6 +4,7 @@ import random
 
 from tqdm import tqdm
 import numpy as np
+import pandas as pd
 
 
 def set_seeds(seed):
@@ -17,14 +18,16 @@ def avg_pooler(hidden_representation):
     return torch.mean(hidden_representation, dim=1, keepdim=False)
 
 
-def random_token_pooler(hidden_representation):
+def random_token_pooler(hidden_representation, seed=42):
     # hidden_representation.shape = (batch_size, sequence_length, hidden_size)
+    random.seed(seed)
     idx = random.randint(0, hidden_representation.shape[1] - 1)
     return hidden_representation[:, idx, :]
 
 
 def last_token_pooler(hidden_representation):
     # hidden_representation.shape = (batch_size, sequence_length, hidden_size)
+    # TODO(mm): This doesn't make sense. It will return a padding token.
     return hidden_representation[:, -1, :]
 
 
@@ -49,6 +52,11 @@ def load_hidden_representations_from_hdf5(input_file):
     hidden_representations = np.asarray(hidden_representations).squeeze()
 
     return hidden_representations
+
+
+def read_templates_from_file(file_name):
+    df = pd.read_csv(file_name, sep=",")
+    return df
 
 
 POOLER = {

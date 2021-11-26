@@ -1,0 +1,17 @@
+name,template,category,shuffle
+null_pattern,{premise} {hypothesis},neutral,false
+null_pattern_reversed,{hypothesis} {premise},neutral,false
+gpt_3_yes_no,{premise} Question: {hypothesis} Yes or No?,instructive,false
+gpt_3_yes_no_shuffled,{premise} Question: {hypothesis} Yes or No?,instructive,true
+gpt_3_true_false,{premise} Question: {hypothesis} True or False?,instructive,false
+gpt_3_true_false_shuffled,{premise} Question: {hypothesis} True or False?,instructive,true
+start_with_the,{premise} Does the paragraph start with "the"? {hypothesis},misleading,false
+mnli_crowdsource,{premise} Using only the above description and what you know about the world; is "{hypothesis}" definitely correct? Yes or No?,instructive,false
+based_on_previous_passage,{premise} Based on the previous passage; is it true that "{hypothesis}"? Yes or No?,instructive,false
+infer,Suppose {premise} Can we infer that "{hypothesis}"? Yes or No?,instructive,false
+follow,Given that {premise} Does it follow that {hypothesis} Yes or No?,instructive,false
+imply,{premise} Question: Does this imply that "{hypothesis}"? Yes or No?,instructive,false
+guaranteed,Given {premise} Is it guaranteed true that "{hypothesis}"? Yes or No?,instructive,false
+justified,{premise} Are we justified in saying that "{hypothesis}"? Yes or No?,instructive,false
+must_be_true,Given that {premise} Therefore it must be true that "{hypothesis}"? Yes or No?,instructive,false
+should_assume,Given {premise} Should we assume that "{hypothesis}" is true? Yes or No?,instructive,false
