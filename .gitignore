@@ -1,2 +1,5 @@
 .vscode
 *.pyc
+data/bigscience-T0_3B
+.ipynb_checkpoints
+__pycache__
