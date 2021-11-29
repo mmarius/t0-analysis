@@ -36,7 +36,7 @@ def first_token_pooler(hidden_representation):
     return hidden_representation[:, 0, :]
 
 
-def load_hidden_representations_from_hdf5(input_file):
+def load_hidden_representations_from_hdf5(input_file, silent=False):
     # the hdf5 files are dictionaries of length n_inputs containing numpy arrays of shape (embedding_dim, )
     f = h5py.File(input_file, "r")
 
@@ -45,7 +45,11 @@ def load_hidden_representations_from_hdf5(input_file):
     rows.sort(key=int)  # sort them numerically
 
     hidden_representations = []
-    for row in tqdm(rows, desc="Reading embeddings"):
+    if silent:
+        gen = rows
+    else:
+        gen = tqdm(rows, desc="Reading embeddings")
+    for row in gen:
         hidden_representation = np.asarray(f[row])
         hidden_representations.append(hidden_representation)
 
@@ -54,8 +58,13 @@ def load_hidden_representations_from_hdf5(input_file):
     return hidden_representations
 
 
-def read_templates_from_file(file_name):
-    df = pd.read_csv(file_name, sep=",")
+def read_templates_from_file(file_name, sep=";"):
+    df = pd.read_csv(file_name, sep=sep)
+    return df
+
+
+def read_predictions_from_file(file_name, sep=";"):
+    df = pd.read_csv(file_name, sep=sep, names=['predicted_sequence'])
     return df
 
 

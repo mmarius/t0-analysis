@@ -55,7 +55,7 @@ def load_tokenizer(tokenizer_name_or_path):
 def tokenize_dataset(args, task, dataset, tokenizer, template):
     prompt = PROMPTED_TASKS[task]
 
-    # save some prompted samples for inspection
+    # save prompted samples for inspection
     with open(
         os.path.join(args.template_output_dir, "prompted_samples.csv"),
         "w",
@@ -73,9 +73,9 @@ def tokenize_dataset(args, task, dataset, tokenizer, template):
     with open(
         os.path.join(args.template_output_dir, "template.csv"), "w", encoding="utf-8"
     ) as f:
-        f.write(f"name,template,category,shuffle\n")
+        f.write(f"name;template;category;includes_labels;shuffle\n")
         f.write(
-            f"{template['name']},{template['template']},{template['category']},{template['shuffle']}\n"
+            f"{template['name']};{template['template']};{template['category']};{template['includes_labels']};{template['shuffle']}\n"
         )
 
     # apply prompt and tokenize
@@ -105,11 +105,33 @@ def postprocess_hidden_representation(hidden_representation, pooler_type):
 
 
 def save_hidden_representations(args, hidden_representations_collection):
-    for l, hidden_representations in hidden_representations_collection.items():
-        if args.layer in [-1, l]:
-            file_name = f"hidden_represenations_layer{l}_{args.pooler_type}.hdf5"
-            output_file = os.path.join(args.template_output_dir, file_name)
-            create_hdf5_file(hidden_representations, output_file)
+    if args.decoder:
+        for t in hidden_representations_collection.keys():
+            for l, hidden_representations in hidden_representations_collection[
+                t
+            ].items():
+                if args.layer in [-1, l]:
+                    file_name = (
+                        f"hidden_represenations_t{t}_layer{l}_{args.pooler_type}.hdf5"
+                    )
+                    output_file = os.path.join(args.template_output_dir, file_name)
+                    create_hdf5_file(hidden_representations, output_file)
+    else:
+        for l, hidden_representations in hidden_representations_collection.items():
+            if args.layer in [-1, l]:
+                file_name = f"hidden_represenations_layer{l}_{args.pooler_type}.hdf5"
+                output_file = os.path.join(args.template_output_dir, file_name)
+                create_hdf5_file(hidden_representations, output_file)
+
+
+def save_decoded_sequences(args, decoded_predictions):
+    with open(
+        os.path.join(args.template_output_dir, "decoded_predictions.csv"),
+        "w",
+        encoding="utf-8",
+    ) as f:
+        for _, s in enumerate(decoded_predictions):
+            f.write(f"{s}\n")
 
 
 def create_hdf5_file(hidden_representations, output_file):
@@ -147,7 +169,7 @@ def main(args):
 
     templates = []
     if args.template_file is not None:
-        df = read_templates_from_file(args.template_file)
+        df = read_templates_from_file(args.template_file, sep=";")
         for _, row in df.iterrows():
             if args.template_name == "all":
                 templates.append(row)
@@ -182,15 +204,16 @@ def main(args):
         )
 
         hidden_representations_collection = {}
+        decoded_predictions = []
+        inputs_seen = 0
 
         # iterate over dataset
         model.eval()
         with torch.no_grad():
             for _, batch in enumerate(dataloader):
                 # stop after max_inputs samples
-                if hidden_representations_collection:
-                    if hidden_representations_collection[0].shape[0] >= args.max_inputs:
-                        break
+                if inputs_seen >= args.max_inputs:
+                    break
 
                 # format batch and put data on GPU
                 formatted_batch = {
@@ -198,54 +221,88 @@ def main(args):
                     "attention_mask": batch["attention_mask"].to("cuda:0"),
                     # "labels": batch["label"].to("cuda:0"),
                 }
-                # outputs = model.generate(
-                outputs = model.forward(
+                outputs = model.generate(
                     input_ids=formatted_batch["input_ids"],
                     attention_mask=formatted_batch["attention_mask"],
-                    decoder_input_ids=formatted_batch["input_ids"],
+                    max_length=3,
                     output_hidden_states=True,
-                    # return_dict_in_generate=True,
-                    return_dict=True,
+                    output_scores=True,
+                    return_dict_in_generate=True,
                 )
 
                 # get encoder hidden representations
                 encoder_hidden_representations = (
                     outputs.encoder_hidden_states
                 )  # Tuple of :obj:`torch.FloatTensor` (one for the output of the embeddings + one for the output of each layer)
-                # of shape :obj:`(batch_size, sequence_length, hidden_size)`
+                # of shape :obj:`(batch_size, sequence_length, hidden_size)`.
 
                 # get decoder hidden representations
                 decoder_hidden_representations = (
                     outputs.decoder_hidden_states
                 )  # Tuple (one element for each generated token) of tuples (one element for each layer of the decoder) of
-                # :obj:`torch.FloatTensor` of shape :obj:`(batch_size, generated_length, hidden_size)`
+                # :obj:`torch.FloatTensor` of shape :obj:`(batch_size, generated_length, hidden_size)`.
 
-                hidden_represenations = (
-                    decoder_hidden_representations
-                    if args.decoder
-                    else encoder_hidden_representations
-                )
-
-                # post-process hidden states
-                for l, h in enumerate(hidden_represenations):
-                    # post-process hidden state representation
-                    h = postprocess_hidden_representation(
-                        h, pooler_type=args.pooler_type
-                    )
-
-                    # collect post-processed hidden states for every layer
-                    if l in hidden_representations_collection:
-                        hidden_representations_collection[l] = np.concatenate(
-                            (hidden_representations_collection[l], h), axis=0
-                        )
-                    else:
-                        hidden_representations_collection[l] = h
-
-                # decode prediction
-                # generated_sequences = tokenizer.batch_decode(
-                #     outputs.sequences, skip_special_tokens=True
+                # hidden_represenations = (
+                #     decoder_hidden_representations
+                #     if args.decoder
+                #     else encoder_hidden_representations
                 # )
-                # print(generated_sequences)
+
+                # get predictions
+                sequences = (
+                    outputs.sequences
+                )  # (:obj:`torch.LongTensor` of shape :obj:`(batch_size*num_return_sequences, sequence_length)`):
+                # The generated sequences. The second dimension (sequence_length) is either equal to :obj:`max_length` or
+                # shorter if all batches finished early due to the :obj:`eos_token_id`.
+
+                if not args.decoder:
+                    # post-process encoder hidden states
+                    for l, h in enumerate(encoder_hidden_representations):
+                        # post-process hidden state representation
+                        h = postprocess_hidden_representation(
+                            h, pooler_type=args.pooler_type
+                        )
+
+                        # collect post-processed hidden states for every layer
+                        if l in hidden_representations_collection:
+                            hidden_representations_collection[l] = np.concatenate(
+                                (hidden_representations_collection[l], h), axis=0
+                            )
+                        else:
+                            hidden_representations_collection[l] = h
+                else:
+                    # post-process decoder hidden states
+                    for (tidx, t) in enumerate(
+                        decoder_hidden_representations
+                    ):  # iterate over generated tokens
+                        for l, h in enumerate(t):
+                            # post-process hidden state representation
+                            h = postprocess_hidden_representation(
+                                h,
+                                pooler_type=args.pooler_type,  # h is of shape (bsz, 1, d)
+                            )
+                            # collect post-processed hidden states for every layer
+                            if tidx not in hidden_representations_collection:
+                                hidden_representations_collection[tidx] = {}
+
+                            if l in hidden_representations_collection[tidx]:
+                                hidden_representations_collection[tidx][
+                                    l
+                                ] = np.concatenate(
+                                    (hidden_representations_collection[tidx][l], h), axis=0
+                                )
+                            else:
+                                hidden_representations_collection[tidx][l] = h
+
+                # collect predictions
+                for seq in sequences:
+                    decoded_seq = tokenizer.convert_ids_to_tokens(seq)
+                    decoded_predictions.append(decoded_seq)
+
+                inputs_seen += batch["input_ids"].shape[0]
+
+        # decode and save prediction
+        save_decoded_sequences(args, decoded_predictions)
 
         # store hidden states on disc
         save_hidden_representations(args, hidden_representations_collection)
@@ -265,9 +322,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--task",
         type=str,
-        choices=["rte"],
+        choices=["rte", "cb", "wic"],
         required=True,
-        help="super_glue task for which to compute hidden states. defaults to rte",  # TODO(mm): support other datasets as well
+        help="super_glue task for which to compute hidden states",  # TODO: support non super_glue tasks as well
     )
 
     parser.add_argument(

@@ -21,7 +21,6 @@ dataset = load_dataset(
     streaming=False,
 )
 
-
 print("Load tokenizer...")
 # load tokenizer
 tokenizer = AutoTokenizer.from_pretrained(
