@@ -16,13 +16,13 @@ MODEL="bigscience/T0_3B" # 3B params
 # --output_dir "/logfiles" \
 # --layer 0
 
-python /t0-analysis/compute_representations.py \
---model_name_or_path "${MODEL}" \
---task "rte" \
---max_inputs 277 \
---template_file "/t0-analysis/prompts/rte.csv" \
---template_name "all" \
---output_dir "/logfiles"
+# python /t0-analysis/compute_representations.py \
+# --model_name_or_path "${MODEL}" \
+# --task "rte" \
+# --max_inputs 277 \
+# --template_file "/t0-analysis/prompts/rte.csv" \
+# --template_name "all" \
+# --output_dir "/logfiles"
 
 
 ### decoder
@@ -37,14 +37,14 @@ python /t0-analysis/compute_representations.py \
 # --decoder \
 # --layer 0
 
-# python /t0-analysis/compute_representations.py \
-# --model_name_or_path "${MODEL}" \
-# --task "rte" \
-# --max_inputs 277 \
-# --template_file "/t0-analysis/prompts/rte.csv" \
-# --template_name "all" \
-# --output_dir "/logfiles" \
-# --decoder
+python /t0-analysis/compute_representations.py \
+--model_name_or_path "${MODEL}" \
+--task "rte" \
+--max_inputs 277 \
+--template_file "/t0-analysis/prompts/rte.csv" \
+--template_name "all" \
+--output_dir "/logfiles" \
+--decoder
 
 
 
