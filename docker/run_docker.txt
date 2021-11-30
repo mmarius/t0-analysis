@@ -51,3 +51,11 @@ docker run -it --rm --gpus=all --pid=host --ipc=host --user mmosbach \
 ############################################################################
 
 export PYTHONPATH="$PYTHONPATH:/t0-analysis"
+
+
+############################################################################
+# install CKA-similarity https://github.com/jayroxis/CKA-similarity
+############################################################################
+
+cd /t0-analysis
+git clone git@github.com:jayroxis/CKA-similarity.git
