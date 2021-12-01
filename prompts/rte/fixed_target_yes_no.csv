@@ -1,0 +1,11 @@
+name;template;category;includes_targets;targets;target_ids;shuffle
+gpt_3_yes_no_with_targets;{premise} Question: {hypothesis} Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+mnli_crowdsource_with_targets;{premise} Using only the above description and what you know about the world, is "{hypothesis}" definitely correct? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+based_on_previous_passage_with_targets;{premise} Based on the previous passage, is it true that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+infer_with_targets;Suppose {premise} Can we infer that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+follow_with_targets;Given that {premise} Does it follow that {hypothesis} Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+imply_with_targets;{premise} Question: Does this imply that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+guaranteed_with_targets;Given {premise} Is it guaranteed true that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+justified_with_targets;{premise} Are we justified in saying that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+must_be_true_with_targets;Given that {premise} Therefore, it must be true that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
+should_assume_with_targets;Given {premise} Should we assume that "{hypothesis}" is true? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false

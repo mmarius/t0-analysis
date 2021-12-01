@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1,2,3
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 MODEL="bigscience/T0_3B" # 3B params
 # MODEL="bigscience/T0" # 11B params
@@ -20,7 +20,7 @@ MODEL="bigscience/T0_3B" # 3B params
 # --model_name_or_path "${MODEL}" \
 # --task "rte" \
 # --max_inputs 277 \
-# --template_file "/t0-analysis/prompts/rte.csv" \
+# --template_file "/t0-analysis/prompts/rte/fixed_target_yes_no.csv" \
 # --template_name "all" \
 # --output_dir "/logfiles"
 
@@ -41,7 +41,7 @@ python /t0-analysis/compute_representations.py \
 --model_name_or_path "${MODEL}" \
 --task "rte" \
 --max_inputs 277 \
---template_file "/t0-analysis/prompts/rte.csv" \
+--template_file "/t0-analysis/prompts/rte/fixed_prompt.csv" \
 --template_name "all" \
 --output_dir "/logfiles" \
 --decoder
@@ -86,7 +86,7 @@ python /t0-analysis/compute_representations.py \
 # --model_name_or_path "${MODEL}" \
 # --task "cb" \
 # --max_inputs 56 \
-# --template_file "/t0-analysis/prompts/cb.csv" \
+# --template_file "/t0-analysis/prompts/cb_.csv" \
 # --template_name "all" \
 # --output_dir "/logfiles" \
 # --decoder

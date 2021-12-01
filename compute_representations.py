@@ -8,11 +8,12 @@ import torch
 import h5py
 import numpy as np
 from tqdm import tqdm
+import pandas as pd
 
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-from task_helpers import PROMPTED_TASKS, shuffle_input
+from task_helpers import PROMPTED_TASKS, TASK_LABELS, shuffle_input
 from utils import set_seeds, read_templates_from_file, POOLER
 
 
@@ -30,8 +31,12 @@ def create_template_output_dir(args, template):
         template["name"],
     )
 
-    # make sure output_dir exists
-    Path(args.template_output_dir).mkdir(parents=True, exist_ok=True)
+    # check if output dir already exists
+    if os.path.exists(args.template_output_dir):
+        return True
+    else:
+        Path(args.template_output_dir).mkdir(parents=True, exist_ok=True)
+        return False
 
 
 def load_model(model_name_or_path, put_on_gpu=True):
@@ -61,29 +66,31 @@ def tokenize_dataset(args, task, dataset, tokenizer, template):
         "w",
         encoding="utf-8",
     ) as f:
+        f.write(f"input\tlabel\n")
         for _, s in enumerate(dataset):
+            prompted_sample, sample_label = prompt(s, template["template"])
             prompted_sample = (
-                shuffle_input(prompt(s, template["template"]), seed=args.seed)
+                shuffle_input(prompted_sample, seed=args.seed)
                 if template["shuffle"]
-                else prompt(s, template["template"])
+                else prompted_sample
             )
-            f.write(f"{prompted_sample}\n")
+            f.write(f"{prompted_sample}\t{sample_label}\n")
 
     # # save template as well
     with open(
         os.path.join(args.template_output_dir, "template.csv"), "w", encoding="utf-8"
     ) as f:
-        f.write(f"name;template;category;includes_labels;shuffle\n")
+        f.write(f"name;template;category;includes_targets;targets;target_ids;shuffle\n")
         f.write(
-            f"{template['name']};{template['template']};{template['category']};{template['includes_labels']};{template['shuffle']}\n"
+            f"{template['name']};{template['template']};{template['category']};{template['includes_targets']};{template['targets']};{template['target_ids']};{template['shuffle']}\n"
         )
 
     # apply prompt and tokenize
     dataset = dataset.map(
         lambda s: tokenizer(
-            shuffle_input(prompt(s, template["template"]), seed=args.seed)
+            shuffle_input(prompt(s, template["template"])[0], seed=args.seed)
             if template["shuffle"]
-            else prompt(s, template["template"]),
+            else prompt(s, template["template"])[0],
             truncation=True,
             padding="max_length",
         ),
@@ -133,6 +140,44 @@ def save_decoded_sequences(args, decoded_predictions):
         for _, s in enumerate(decoded_predictions):
             f.write(f"{s}\n")
 
+    # also append decoded prediction to prompted_samples.csv
+
+    # get template
+    template = pd.read_csv(
+        os.path.join(args.template_output_dir, "template.csv"), sep=";"
+    )
+    targets = template.iloc[0]["targets"]  # this will be something like 'Yes, No'
+    targets = [t.strip() for t in targets.split(",")]
+    target_ids = template.iloc[0]["target_ids"]  # this will be something like '0, 1'
+    target_ids = [int(tidx.strip()) for tidx in target_ids.split(",")]
+
+    predictions = []
+    for _, s in enumerate(decoded_predictions):
+        prediction = s[1]  # prediction is token at id=1
+        # map prediction to label index
+        if prediction in targets:
+            prediction_idx = targets.index(prediction)
+            prediction_idx = target_ids[prediction_idx]
+        else:
+            prediction_idx = -1  # model predicted something that is not a target
+        # map label index to task label
+        if prediction_idx != -1:
+            prediction = TASK_LABELS[args.task][prediction_idx]
+        else:
+            prediction = "<token>"
+        # collect predictions
+        predictions.append(prediction)
+
+    prompted_samples_df = pd.read_csv(
+        os.path.join(args.template_output_dir, "prompted_samples.csv"),
+        sep="\t",
+    )
+    predictions = pd.Series(predictions, index=prompted_samples_df.index)
+    prompted_samples_df["prediction"] = predictions
+    prompted_samples_df.to_csv(
+        os.path.join(args.template_output_dir, "prompted_samples.csv"), sep="\t"
+    )
+
 
 def create_hdf5_file(hidden_representations, output_file):
     # hidden_representations.shape = (batch_size, hidden_size)
@@ -180,7 +225,9 @@ def main(args):
     # iterate over templates
     for template in tqdm(templates, desc="Iterating over templates"):
         # create output dir
-        create_template_output_dir(args, template)
+        already_exists = create_template_output_dir(args, template)
+        if already_exists:
+            continue
 
         # load dataset
         dataset = load_dataset(
@@ -289,7 +336,8 @@ def main(args):
                                 hidden_representations_collection[tidx][
                                     l
                                 ] = np.concatenate(
-                                    (hidden_representations_collection[tidx][l], h), axis=0
+                                    (hidden_representations_collection[tidx][l], h),
+                                    axis=0,
                                 )
                             else:
                                 hidden_representations_collection[tidx][l] = h

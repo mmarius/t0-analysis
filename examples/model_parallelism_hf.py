@@ -3,6 +3,7 @@
 # Tested: 4 16GB V100 or 2 32GB V100 (basically need somewhere to fit ~42GB of fp32 params)
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
+import numpy as np
 
 model_name = "bigscience/T0_3B"
 
@@ -18,13 +19,29 @@ print("Model and tokenizer loaded")
 model.parallelize()
 print("Moved model to GPUs")
 
+# embedding_matrix = model.shared.weight
+# print(embedding_matrix.shape)
+
+# # save embedding matrix
+# with open("/logfiles/embeddings/embedding_matrix.npy", "wb") as f:
+#     np.save(f, embedding_matrix.cpu().detach().numpy())
+
 inputs = tokenizer.encode(
     "Review: the movie was not great. Is this review positive or negative?",
     return_tensors="pt",
 )
+
+# ids = tokenizer._convert_token_to_id_with_added_voc("<pad>")
+# print(ids)
+
 inputs = inputs.to("cuda:0")
 with torch.no_grad():
-    outputs = model.generate(inputs, output_hidden_states=True, output_scores=True, return_dict_in_generate=True)
+    outputs = model.generate(
+        inputs,
+        output_hidden_states=True,
+        output_scores=True,
+        return_dict_in_generate=True,
+    )
 
     sequences = outputs.sequences
 
@@ -38,18 +55,18 @@ with torch.no_grad():
 
 print(tokenizer.batch_decode(sequences, skip_special_tokens=False))
 
-print('sequences', sequences.shape)
+print("sequences", sequences.shape)
 
 for tid in torch.flatten(sequences):
     print(tid, tokenizer._convert_id_to_token(tid))
 
-print('encoder_hidden_states')
-for i, h in enumerate(encoder_hidden_states): # iterate over encoder layers
+print("encoder_hidden_states")
+for i, h in enumerate(encoder_hidden_states):  # iterate over encoder layers
     print(i, h.shape)
 
-print('decoder_hidden_states:', len(decoder_hidden_states))
-for i, t in enumerate(decoder_hidden_states): # iterate over generated tokens
-    for j, h in enumerate(t): # iterate over decoder layers
+print("decoder_hidden_states:", len(decoder_hidden_states))
+for i, t in enumerate(decoder_hidden_states):  # iterate over generated tokens
+    for j, h in enumerate(t):  # iterate over decoder layers
         print(i, j, h.shape)
 
 print("FINISHED")
