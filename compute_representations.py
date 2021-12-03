@@ -257,6 +257,7 @@ def main(args):
         # iterate over dataset
         model.eval()
         with torch.no_grad():
+            previous_batch = None
             for _, batch in enumerate(dataloader):
                 # stop after max_inputs samples
                 if inputs_seen >= args.max_inputs:
@@ -268,6 +269,11 @@ def main(args):
                     "attention_mask": batch["attention_mask"].to("cuda:0"),
                     # "labels": batch["label"].to("cuda:0"),
                 }
+
+                if previous_batch is not None:
+                    assert not torch.equal(batch["input_ids"], previous_batch)
+                previous_batch = batch["input_ids"]
+
                 outputs = model.generate(
                     input_ids=formatted_batch["input_ids"],
                     attention_mask=formatted_batch["attention_mask"],
@@ -363,7 +369,12 @@ if __name__ == "__main__":
         "--model_name_or_path",
         type=str,
         default="bigscience/T0_3B",
-        choices=["bigscience/T0", "bigscience/T0_3B"],
+        choices=[
+            "bigscience/T0",
+            "bigscience/T0_3B",
+            "google/t5-xl-lm-adapt",
+            "google/t5-xxl-lm-adapt",
+        ],
         help="which model to use. defaults to bigscience/T0_3B",
     )
 
