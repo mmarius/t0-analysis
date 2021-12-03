@@ -1,0 +1,7 @@
+name;template;category;includes_targets;targets;target_ids;shuffle
+gpt_3_yes_no_with_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above? Yes, No?;instructive;true;▁No, ▁Yes;0, 1;false
+grammar_homework_with_targets;Decide whether the word "{word}" is used with the same meaning in the two following sentences. Answer by Yes or No. {sentence1} {sentence2};instructive;true;▁No, ▁Yes;0, 1;false
+polysemous_with_targets;The word "{word}" has multiple meanings. Does it have the same meaning in sentences 1 and 2? Yes or No? Sentence 1: {sentence1} Sentence 2: {sentence2};instructive;true;▁No, ▁Yes;0, 1;false
+question_meaning_yes_no_with_targets;Does the word "{word}" have the same meanining in these two sentences? Yes, No? {sentence1} {sentence2};instructive;true;▁No, ▁Yes;0, 1;false
+same_sense_with_targets;Sentence 1: {sentence1} Sentence 2: {sentence2} Determine whether the word "{word}" is used in the same sense in both sentences. Yes or No?;instructive;true;▁No, ▁Yes;0, 1;false
+similar_sense_yes_no_with_targets;{sentence1} {sentence2} Similar sense of {word}? Yes, No?;instructive;true;▁No, ▁Yes;0, 1;false

@@ -1,0 +1,14 @@
+name;template;category;includes_targets;targets;target_ids;shuffle
+gpt_3_without_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above?;instructive;false;▁No, ▁no, ▁Yes, ▁yes;0, 0, 1, 1;false
+gpt_3_yes_no_with_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above? Yes, No?;instructive;true;▁No, ▁Yes;0, 1;false
+affirmation_with_targets;Sentence A: {sentence1} Sentence B: {sentence2} "{word} has a similar meaning in sentence A and B. True or False?;instructive;true;▁Fal, ▁True;0, 1;false
+grammar_homework_with_targets;Decide whether the word "{word}" is used with the same meaning in the two following sentences. Answer by Yes or No. {sentence1} {sentence2};instructive;true;▁No, ▁Yes;0, 1;false
+polysemous_with_targets;The word "{word}" has multiple meanings. Does it have the same meaning in sentences 1 and 2? Yes or No? Sentence 1: {sentence1} Sentence 2: {sentence2};instructive;true;▁No, ▁Yes;0, 1;false
+question_context_without_targets;Determine if the word "{word}" is used in the same way in the two sentences below. {sentence1} {sentence2};instructive;false;▁No, ▁no, ▁Yes, ▁yes;0, 0, 1, 1;false
+question_meaning_without_targets;Determine if the word "{word}" have the same meanining in the two sentences below. {sentence1} {sentence2};instructive;false;▁No, ▁no, ▁Yes, ▁yes;0, 0, 1, 1;false
+question_meaning_yes_no_with_targets;Does the word "{word}" have the same meanining in these two sentences? Yes, No? {sentence1} {sentence2};instructive;true;▁No, ▁Yes;0, 1;false
+same_sense_with_targets;Sentence 1: {sentence1} Sentence 2: {sentence2} Determine whether the word "{word}" is used in the same sense in both sentences. Yes or No?;instructive;true;▁No, ▁Yes;0, 1;false
+similar_sense_without_targets;{sentence1} {sentence2} Similar sense of {word}?;instructive;false;▁No, ▁no, ▁Yes, ▁yes;0, 0, 1, 1;false
+similar_sense_yes_no_with_targets;{sentence1} {sentence2} Similar sense of {word}? Yes, No?;instructive;true;▁No, ▁Yes;0, 1;false
+gpt_3_true_false_with_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above? True, False?;instructive;true;▁Fal, ▁True;0, 1;false
+gpt_3_cat_dog_with_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above? Cat, Dog?;instructive;true;▁Cat, ▁Dog;0, 1;false

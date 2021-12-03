@@ -1,5 +1,5 @@
 name;template;category;includes_targets;targets;target_ids;shuffle
 gpt_3_yes_no_with_targets;{premise} Question: {hypothesis} Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-gpt_3_true_false_with_targets;{premise} Question: {hypothesis} True or False?;instructive;true;▁True, ▁False;0, 1;false
+gpt_3_true_false_with_targets;{premise} Question: {hypothesis} True or False?;instructive;true;▁True, ▁Fal;0, 1;false
 gpt_3_cat_dog_with_targets;{premise} Question: {hypothesis} Cat or Dog?;instructive;true;▁Cat, ▁Dog;0, 1;false
 gpt_3_yes_no_without_targets;{premise} Question: {hypothesis}?;instructive;false;▁Yes, ▁No;0, 1;false

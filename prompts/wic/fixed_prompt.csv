@@ -1,0 +1,5 @@
+name;template;category;includes_targets;targets;target_ids;shuffle
+gpt_3_yes_no_with_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above? Yes, No?;instructive;true;▁No, ▁Yes;0, 1;false
+gpt_3_true_false_with_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above? True, False?;instructive;true;▁Fal, ▁True;0, 1;false
+gpt_3_cat_dog_with_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above? Cat, Dog?;instructive;true;▁Cat, ▁Dog;0, 1;false
+gpt_3_without_targets;{sentence1} {sentence2} Question: Is the word "{word}" used in the same sense in the two sentences above?;instructive;false;▁No, ▁no, ▁Yes, ▁yes;0, 0, 1, 1;false
