@@ -1,6 +1,8 @@
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
-MODEL="bigscience/T0_3B" # 3B params
+MODEL="google/t5-xl-lm-adapt" # 3B params
+# MODEL="google/t5-xxl-lm-adapt" # 11B params
+# MODEL="bigscience/T0_3B" # 3B params
 # MODEL="bigscience/T0" # 11B params
 
 ##  rte (has 277 dev samples and 2490 train examples)
@@ -20,7 +22,7 @@ MODEL="bigscience/T0_3B" # 3B params
 # --model_name_or_path "${MODEL}" \
 # --task "rte" \
 # --max_inputs 277 \
-# --template_file "/t0-analysis/prompts/rte/fixed_target_yes_no.csv" \
+# --template_file "/t0-analysis/prompts/rte/all.csv" \
 # --template_name "all" \
 # --output_dir "/logfiles"
 
@@ -37,14 +39,14 @@ MODEL="bigscience/T0_3B" # 3B params
 # --decoder \
 # --layer 0
 
-python /t0-analysis/compute_representations.py \
---model_name_or_path "${MODEL}" \
---task "rte" \
---max_inputs 277 \
---template_file "/t0-analysis/prompts/rte/fixed_prompt.csv" \
---template_name "all" \
---output_dir "/logfiles" \
---decoder
+# python /t0-analysis/compute_representations.py \
+# --model_name_or_path "${MODEL}" \
+# --task "rte" \
+# --max_inputs 277 \
+# --template_file "/t0-analysis/prompts/rte/all.csv" \
+# --template_name "all" \
+# --output_dir "/logfiles" \
+# --decoder
 
 
 
@@ -101,18 +103,18 @@ python /t0-analysis/compute_representations.py \
 # --model_name_or_path "${MODEL}" \
 # --task "wic" \
 # --max_inputs 638 \
-# --template_file "/t0-analysis/prompts/wic.csv" \
+# --template_file "/t0-analysis/prompts/wic/all.csv" \
 # --template_name "all" \
 # --output_dir "/logfiles" \
 # --layer 0
 
-# python /t0-analysis/compute_representations.py \
-# --model_name_or_path "${MODEL}" \
-# --task "wic" \
-# --max_inputs 638 \
-# --template_file "/t0-analysis/prompts/wic.csv" \
-# --template_name "all" \
-# --output_dir "/logfiles"
+python /t0-analysis/compute_representations.py \
+--model_name_or_path "${MODEL}" \
+--task "wic" \
+--max_inputs 638 \
+--template_file "/t0-analysis/prompts/wic/all.csv" \
+--template_name "all" \
+--output_dir "/logfiles"
 
 
 ### decoder
@@ -121,7 +123,7 @@ python /t0-analysis/compute_representations.py \
 # --model_name_or_path "${MODEL}" \
 # --task "wic" \
 # --max_inputs 638 \
-# --template_file "/t0-analysis/prompts/wic.csv" \
+# --template_file "/t0-analysis/prompts/wic/all.csv" \
 # --template_name "all" \
 # --output_dir "/logfiles" \
 # --decoder \
@@ -131,7 +133,7 @@ python /t0-analysis/compute_representations.py \
 # --model_name_or_path "${MODEL}" \
 # --task "wic" \
 # --max_inputs 638 \
-# --template_file "/t0-analysis/prompts/wic.csv" \
+# --template_file "/t0-analysis/prompts/wic/all.csv" \
 # --template_name "all" \
 # --output_dir "/logfiles" \
 # --decoder
