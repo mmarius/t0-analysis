@@ -1,0 +1,8 @@
+name;template;category;includes_targets;targets;target_ids;shuffle
+words_appear_with_targets;"{hypothesis} Do most of the above words appear in the following passage? ""{premise}"" Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+similar_words_with_targets;"{premise} Are there lots of similar words in ""{hypothesis}""? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+start_with_the_with_targets;"{premise} Does the paragraph start with ""the""? {hypothesis} Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+same_meaning_with_targets;"{premise} Does that have the same meaning as ""{hypothesis}""? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+paraphrase_with_targets;{premise} Can that be paraphrased as: {hypothesis}? Yes or No?;misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+paraphrase_r_with_targets;{hypothesis} Can that be paraphrased as: {premise}? Yes or No?;misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+summarize_with_targets;"{premise} Can that be summarized as ""{hypothesis}""? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False

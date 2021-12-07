@@ -1,14 +1,31 @@
 name;template;category;includes_targets;targets;target_ids;shuffle
-gpt_3_yes_no_with_targets;{premise} Question: {hypothesis} Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-mnli_crowdsource_with_targets;{premise} Using only the above description and what you know about the world, is "{hypothesis}" definitely correct? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-based_on_previous_passage_with_targets;{premise} Based on the previous passage, is it true that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-infer_with_targets;Suppose {premise} Can we infer that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-follow_with_targets;Given that {premise} Does it follow that {hypothesis} Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-imply_with_targets;{premise} Question: Does this imply that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-guaranteed_with_targets;Given {premise} Is it guaranteed true that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-justified_with_targets;{premise} Are we justified in saying that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-must_be_true_with_targets;Given that {premise} Therefore, it must be true that "{hypothesis}"? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-should_assume_with_targets;Given {premise} Should we assume that "{hypothesis}" is true? Yes or No?;instructive;true;▁Yes, ▁No;0, 1;false
-gpt_3_true_false_with_targets;{premise} Question: {hypothesis} True or False?;instructive;true;▁True, ▁Fal;0, 1;false
-gpt_3_cat_dog_with_targets;{premise} Question: {hypothesis} Cat or Dog?;instructive;true;▁Cat, ▁Dog;0, 1;false
-gpt_3_yes_no_without_targets;{premise} Question: {hypothesis}?;instructive;false;▁Yes, ▁No;0, 1;false
+gpt_3_yes_no_with_targets;{premise} Question: {hypothesis} Yes or No?;instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+mnli_crowdsource_with_targets;"{premise} Using only the above description and what you know about the world, is ""{hypothesis}"" definitely correct? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+based_on_previous_passage_with_targets;"{premise} Based on the previous passage, is it true that ""{hypothesis}""? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+infer_with_targets;"Suppose {premise} Can we infer that ""{hypothesis}""? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+follow_with_targets;Given that {premise} Does it follow that {hypothesis} Yes or No?;instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+imply_with_targets;"{premise} Question: Does this imply that ""{hypothesis}""? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+guaranteed_with_targets;"Given {premise} Is it guaranteed true that ""{hypothesis}""? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+justified_with_targets;"{premise} Are we justified in saying that ""{hypothesis}""? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+must_be_true_with_targets;"Given that {premise} Therefore, it must be true that ""{hypothesis}""? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+should_assume_with_targets;"Given {premise} Should we assume that ""{hypothesis}"" is true? Yes or No?";instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+gpt_3_true_false_with_targets;{premise} Question: {hypothesis} True or False?;instructive;True;▁True, ▁Fal;0, 1;False
+gpt_3_cat_dog_with_targets;{premise} Question: {hypothesis} Cat or Dog?;instructive;True;▁Cat, ▁Dog;0, 1;False
+gpt_3_cat_dog_with_targets_yes_no;{premise} Question: {hypothesis} Cat or Dog?;instructive;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+gpt_3_yes_no_without_targets;{premise} Question: {hypothesis}?;instructive;False;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+words_appear_with_targets;"{hypothesis} Do most of the above words appear in the following passage? ""{premise}"" Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+similar_words_with_targets;"{premise} Are there lots of similar words in ""{hypothesis}""? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+start_with_the_with_targets;"{premise} Does the paragraph start with ""the""? {hypothesis} Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+same_meaning_with_targets;"{premise} Does that have the same meaning as ""{hypothesis}""? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+paraphrase_with_targets;{premise} Can that be paraphrased as: {hypothesis}? Yes or No?;misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+paraphrase_r_with_targets;{hypothesis} Can that be paraphrased as: {premise}? Yes or No?;misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+summarize_with_targets;"{premise} Can that be summarized as ""{hypothesis}""? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+inflection_with_targets;{premise} Inflections are annoying and thank god that Middle English got rid of most of them. {hypothesis}? Yes or No?;irrelevant;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+null_pattern_with_targets;{premise} {hypothesis}? Yes or No?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+null_pattern_r_with_targets;{hypothesis} {premise}? Yes or No?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+null_pattern_without_targets;{premise} {hypothesis}?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+null_pattern_r_without_targets;{hypothesis} {premise}?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+premise_only_with_targets;{premise}? Yes or No?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+premise_only_without_targets;{premise}?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+hypothesis_only_with_targets;{hypothesis}? Yes or No?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+hypothesis_only_without_targets;{hypothesis}?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
