@@ -59,3 +59,9 @@ export PYTHONPATH="$PYTHONPATH:/t0-analysis"
 
 cd /t0-analysis
 git clone git@github.com:jayroxis/CKA-similarity.git
+
+############################################################################
+# install altair
+############################################################################
+
+pip install altair vega_datasets
