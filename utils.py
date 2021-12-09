@@ -6,6 +6,8 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 
+pd.set_option("display.max_colwidth", -1)
+
 
 def set_seeds(seed):
     torch.manual_seed(seed)
@@ -16,6 +18,28 @@ def set_seeds(seed):
 def avg_pooler(hidden_representation):
     # hidden_representation.shape = (batch_size, sequence_length, hidden_size)
     return torch.mean(hidden_representation, dim=1, keepdim=False)
+
+
+def avg_pooler_no_padding(input_ids, hidden_representation, pad_token_id):
+    # ignore padding tokens when taking the average
+    # hidden_representation.shape = (batch_size, sequence_length, hidden_size)
+    hidden_size = hidden_representation.shape[-1]
+    all_hidden_states = []
+    for idx, hidden_state in enumerate(hidden_representation):
+        mask = torch.where(
+            input_ids[idx] != pad_token_id,
+            torch.tensor(True).to("cuda:0"),
+            torch.tensor(False).to("cuda:0"),
+        )
+
+        candidates = torch.masked_select(hidden_state, mask[:, None]).reshape(
+            -1, hidden_size
+        )
+        pooled_hidden_states = torch.mean(candidates, dim=0)
+        all_hidden_states.append(pooled_hidden_states)
+
+    hidden_states = torch.stack(all_hidden_states, dim=0)
+    return hidden_states
 
 
 def random_token_pooler(hidden_representation, seed=42):
@@ -64,12 +88,13 @@ def read_templates_from_file(file_name, sep=";"):
 
 
 def read_predictions_from_file(file_name, sep=";"):
-    df = pd.read_csv(file_name, sep=sep, names=['predicted_sequence'])
+    df = pd.read_csv(file_name, sep=sep, names=["predicted_sequence"])
     return df
 
 
 POOLER = {
     "avg": avg_pooler,
+    "avg-nopad": avg_pooler_no_padding,
     "random": random_token_pooler,
     "last": last_token_pooler,
     "first": first_token_pooler,

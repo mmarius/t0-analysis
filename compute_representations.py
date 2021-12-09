@@ -100,10 +100,17 @@ def tokenize_dataset(args, task, dataset, tokenizer, template):
     return dataset
 
 
-def postprocess_hidden_representation(hidden_representation, pooler_type):
+def postprocess_hidden_representation(
+    hidden_representation, pooler_type, input_ids, pad_token_id
+):
     # hidden_representation.shape =  (batch_size, sequence_length, hidden_size)
     # apply pooler
-    pooled_hidden_representation = POOLER[pooler_type](hidden_representation)
+    if pooler_type == "avg-nopad":
+        pooled_hidden_representation = POOLER[pooler_type](
+            input_ids, hidden_representation, pad_token_id
+        )
+    else:
+        pooled_hidden_representation = POOLER[pooler_type](hidden_representation)
 
     # convert to numpy array
     pooled_hidden_representation = pooled_hidden_representation.cpu().detach().numpy()
@@ -129,6 +136,14 @@ def save_hidden_representations(args, hidden_representations_collection):
                 file_name = f"hidden_represenations_layer{l}_{args.pooler_type}.hdf5"
                 output_file = os.path.join(args.template_output_dir, file_name)
                 create_hdf5_file(hidden_representations, output_file)
+
+
+def save_scores(args, scores_collection):
+    for idx, t in enumerate(scores_collection.keys()):
+        scores = scores_collection[t]
+        file_name = f"scores_t{idx}.npy"
+        output_file = os.path.join(args.template_output_dir, file_name)
+        np.save(output_file, scores)
 
 
 def save_decoded_sequences(args, decoded_predictions):
@@ -251,6 +266,7 @@ def main(args):
         )
 
         hidden_representations_collection = {}
+        scores_collection = {}
         decoded_predictions = []
         inputs_seen = 0
 
@@ -308,12 +324,24 @@ def main(args):
                 # The generated sequences. The second dimension (sequence_length) is either equal to :obj:`max_length` or
                 # shorter if all batches finished early due to the :obj:`eos_token_id`.
 
+                # get scores
+                scores = outputs.scores
+                # scores (:obj:`tuple(torch.FloatTensor)` `optional`, returned when ``output_scores=True`` is passed or when ``config.output_scores=True``):
+                # Processed prediction scores of the language modeling head (scores for each vocabulary token before SoftMax)
+                # at each generation step. :obj:`(max_length-1,)`-shaped tuple of :obj:`torch.FloatTensor` with each tensor
+                # of shape :obj:`(batch_size, config.vocab_size)`).
+
                 if not args.decoder:
                     # post-process encoder hidden states
                     for l, h in enumerate(encoder_hidden_representations):
                         # post-process hidden state representation
                         h = postprocess_hidden_representation(
-                            h, pooler_type=args.pooler_type
+                            h,
+                            pooler_type=args.pooler_type,
+                            input_ids=formatted_batch["input_ids"],
+                            pad_token_id=tokenizer._convert_token_to_id_with_added_voc(
+                                tokenizer.pad_token
+                            ),
                         )
 
                         # collect post-processed hidden states for every layer
@@ -332,7 +360,11 @@ def main(args):
                             # post-process hidden state representation
                             h = postprocess_hidden_representation(
                                 h,
-                                pooler_type=args.pooler_type,  # h is of shape (bsz, 1, d)
+                                pooler_type="avg",  # h is of shape (bsz, 1, d), so we can just use avg
+                                input_ids=formatted_batch["input_ids"],
+                                pad_token_id=tokenizer._convert_token_to_id_with_added_voc(
+                                    tokenizer.pad_token
+                                ),
                             )
                             # collect post-processed hidden states for every layer
                             if tidx not in hidden_representations_collection:
@@ -348,6 +380,21 @@ def main(args):
                             else:
                                 hidden_representations_collection[tidx][l] = h
 
+                # post-process scores
+                for (sidx, s) in enumerate(scores):  # iterate over generated tokens
+                    # print(s.shape)
+                    # collect scores for every generated token
+                    if sidx not in scores_collection:
+                        scores_collection[sidx] = None
+
+                    if scores_collection[sidx] is None:
+                        scores_collection[sidx] = s.cpu().detach().numpy()
+                    else:
+                        scores_collection[sidx] = np.concatenate(
+                            (scores_collection[sidx], s.cpu().detach().numpy()),
+                            axis=0,
+                        )
+
                 # collect predictions
                 for seq in sequences:
                     decoded_seq = tokenizer.convert_ids_to_tokens(seq)
@@ -360,6 +407,9 @@ def main(args):
 
         # store hidden states on disc
         save_hidden_representations(args, hidden_representations_collection)
+
+        # store scores on disc
+        save_scores(args, scores_collection)
 
 
 if __name__ == "__main__":
@@ -435,6 +485,7 @@ if __name__ == "__main__":
         "--pooler_type",
         type=str,
         default="avg",
+        choices=["avg", "avg-nopad"],
         help="pooler type to use",
     )
 
