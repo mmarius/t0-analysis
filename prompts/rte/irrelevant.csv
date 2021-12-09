@@ -1,2 +1,2 @@
 name;template;category;includes_targets;targets;target_ids;shuffle
-inflection_with_targets;{premise} Inflections are annoying and thank god that Middle English got rid of most of them. {hypothesis}? Yes or No?;irrelevant;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+test;{premise} Inflections are annoying and thank god that Middle English got rid of most of them. {hypothesis}? Yes or No?;irrelevant;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
