@@ -29,3 +29,5 @@ premise_only_with_targets;{premise}? Yes or No?;control;True;▁Yes, ▁No, ▁y
 premise_only_without_targets;{premise}?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
 hypothesis_only_with_targets;{hypothesis}? Yes or No?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
 hypothesis_only_without_targets;{hypothesis}?;control;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+sentiment_with_targets;"{premise} {hypothesis} The sentiment of the previous text is positive? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+sentiment_cat_dog_with_targets;"{premise} {hypothesis} The sentiment of the previous text is positive? Cat or Dog?";misleading;True;▁Cat, ▁Dog;0, 1;False

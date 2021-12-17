@@ -6,3 +6,5 @@ same_meaning_with_targets;"{premise} Does that have the same meaning as ""{hypot
 paraphrase_with_targets;{premise} Can that be paraphrased as: {hypothesis}? Yes or No?;misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
 paraphrase_r_with_targets;{hypothesis} Can that be paraphrased as: {premise}? Yes or No?;misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
 summarize_with_targets;"{premise} Can that be summarized as ""{hypothesis}""? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+sentiment_with_targets;"{premise} {hypothesis} The sentiment of the previous text is positive? Yes or No?";misleading;True;▁Yes, ▁No, ▁yes, ▁no;0, 1, 0, 1;False
+sentiment_cat_dog_with_targets;"{premise} {hypothesis} The sentiment of the previous text is positive? Cat or Dog?";misleading;True;▁Cat, ▁Dog;0, 1;False
