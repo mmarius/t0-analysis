@@ -22,9 +22,10 @@ MODEL="google/t5-xl-lm-adapt" # 3B params
 # --model_name_or_path "${MODEL}" \
 # --task "rte" \
 # --max_inputs 277 \
-# --template_file "/t0-analysis/prompts/rte/all.csv" \
+# --template_file "/t0-analysis/prompts/rte/misleading.csv" \
 # --template_name "all" \
-# --output_dir "/logfiles"
+# --output_dir "/logfiles" \
+# --pooler_type "avg-nopad"
 
 
 ### decoder
@@ -39,14 +40,14 @@ MODEL="google/t5-xl-lm-adapt" # 3B params
 # --decoder \
 # --layer 0
 
-# python /t0-analysis/compute_representations.py \
-# --model_name_or_path "${MODEL}" \
-# --task "rte" \
-# --max_inputs 277 \
-# --template_file "/t0-analysis/prompts/rte/all.csv" \
-# --template_name "all" \
-# --output_dir "/logfiles" \
-# --decoder
+python /t0-analysis/compute_representations.py \
+--model_name_or_path "${MODEL}" \
+--task "rte" \
+--max_inputs 277 \
+--template_file "/t0-analysis/prompts/rte/misleading.csv" \
+--template_name "all" \
+--output_dir "/logfiles" \
+--decoder
 
 
 
@@ -108,13 +109,13 @@ MODEL="google/t5-xl-lm-adapt" # 3B params
 # --output_dir "/logfiles" \
 # --layer 0
 
-python /t0-analysis/compute_representations.py \
---model_name_or_path "${MODEL}" \
---task "wic" \
---max_inputs 638 \
---template_file "/t0-analysis/prompts/wic/all.csv" \
---template_name "all" \
---output_dir "/logfiles"
+# python /t0-analysis/compute_representations.py \
+# --model_name_or_path "${MODEL}" \
+# --task "wic" \
+# --max_inputs 638 \
+# --template_file "/t0-analysis/prompts/wic/all.csv" \
+# --template_name "all" \
+# --output_dir "/logfiles"
 
 
 ### decoder
